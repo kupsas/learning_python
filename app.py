@@ -12,6 +12,14 @@ import logging
 from logging.handlers import RotatingFileHandler
 import datetime
 
+# Load the appropriate .env file based on environment
+if os.environ.get('FLASK_ENV') == 'development':
+    load_dotenv('.env.development')
+    logger_name = 'oracle_app_dev'
+else:
+    load_dotenv('.env.production')
+    logger_name = 'oracle_app_prod'
+
 # Set up logging
 log_directory = "logs"
 if not os.path.exists(log_directory):
@@ -22,6 +30,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+
 # Create a file handler
 file_handler = RotatingFileHandler(
     log_file, 
@@ -39,12 +48,9 @@ console_handler.setFormatter(logging.Formatter(
 ))
 
 # Get the logger
-logger = logging.getLogger('oracle_app')
+logger = logging.getLogger(logger_name)
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Check if API key is available
 if not os.getenv("OPENAI_API_KEY"):
@@ -53,10 +59,33 @@ if not os.getenv("OPENAI_API_KEY"):
 
 app = Flask(__name__)
 
-# Security configurations
-if not os.environ.get('FLASK_DEBUG'):
-    logger.info("Running in production mode - enabling security features")
-    # Enable security headers in production
+# Environment-specific configurations
+is_development = os.environ.get('FLASK_ENV') == 'development'
+if is_development:
+    logger.info("Running in development mode - minimal security features")
+    # Development configuration
+    app.config.update(
+        SESSION_COOKIE_SECURE=False,
+        SESSION_COOKIE_HTTPONLY=True,  # Still keep this security feature
+        SESSION_COOKIE_SAMESITE='Lax',  # More secure default
+        PERMANENT_SESSION_LIFETIME=1800  # 30 minutes
+    )
+    # Initialize Talisman with development-friendly but more secure settings
+    Talisman(app,
+             force_https=False,
+             force_https_permanent=False,
+             strict_transport_security=False,
+             session_cookie_secure=False,
+             content_security_policy={
+                 'default-src': "'self'",
+                 'img-src': ['\'self\'', 'data:', 'https:'],
+                 'script-src': ['\'self\'', '\'unsafe-inline\''],
+                 'style-src': ['\'self\'', '\'unsafe-inline\''],
+             }
+             )
+else:
+    logger.info("Running in production mode - full security features")
+    # Production configuration
     csp = {
         'default-src': "'self'",
         'img-src': ['\'self\'', 'https://images.pexels.com', 'data:'],
@@ -79,32 +108,34 @@ if not os.environ.get('FLASK_DEBUG'):
              frame_options='DENY',
              frame_options_allow_from=None,
              feature_policy={'geolocation': '\'none\''},
-             referrer_policy='strict-origin-when-cross-origin',
-             x_xss_protection=True,
-             x_content_type_options=True,
-             force_file_save=True
+             referrer_policy='strict-origin-when-cross-origin'
              )
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+        PERMANENT_SESSION_LIFETIME=1800  # 30 minutes
+    )
+
+# Rate limiting configuration - disabled in development if specified
+if not (is_development and os.environ.get('DISABLE_RATE_LIMITS') == '1'):
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://"
+    )
 else:
-    logger.warning("Running in debug mode - some security features are disabled")
+    logger.info("Rate limiting disabled for development")
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=[],
+        storage_uri="memory://"
+    )
 
-# Rate limiting configuration
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://"
-)
-
-# Use a secure secret key in production
+# Use appropriate secret key
 app.secret_key = os.getenv('FLASK_SECRET_KEY', secrets.token_hex(32))
-
-# Session configuration
-app.config.update(
-    SESSION_COOKIE_SECURE=True,
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE='Lax',
-    PERMANENT_SESSION_LIFETIME=1800  # 30 minutes
-)
 
 # Initialize the LLM and conversation graph
 llm = ChatOpenAI(model="gpt-4")

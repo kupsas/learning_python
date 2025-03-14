@@ -192,9 +192,8 @@
             margin-top: 2vh;
         }
 
-        #new-chat-button {
+        #new-chat-button, #test-loading-button {
             padding: 12px min(24px, 3vw);
-            background-color: var(--greek-stone);
             color: white;
             border: none;
             border-radius: 5px;
@@ -207,8 +206,21 @@
             white-space: nowrap;
         }
 
+        #new-chat-button {
+            background-color: var(--greek-stone);
+        }
+
+        #test-loading-button {
+            background-color: var(--greek-gold);
+        }
+
         #new-chat-button:hover {
             background-color: #736F73;
+            transform: translateY(-2px);
+        }
+
+        #test-loading-button:hover {
+            background-color: #B8860B;
             transform: translateY(-2px);
         }
 
@@ -294,6 +306,16 @@
             color: var(--greek-marble);
             font-family: 'Lora', serif;
             font-style: italic;
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .fade-out {
+            opacity: 0;
+        }
+
+        .fade-in {
+            opacity: 1;
         }
 
         .crystal-ball {
@@ -339,6 +361,7 @@
     </div>
     <div class="button-container">
         <button id="new-chat-button">New Consultation</button>
+        <button id="test-loading-button" style="background-color: var(--greek-gold);">Test Loading Screen</button>
     </div>
 
     <script>
@@ -347,6 +370,7 @@
             const messageInput = document.getElementById('message-input');
             const sendButton = document.getElementById('send-button');
             const newChatButton = document.getElementById('new-chat-button');
+            const testLoadingButton = document.getElementById('test-loading-button');
 
             function addMessage(content, isUser) {
                 const messageDiv = document.createElement('div');
@@ -384,16 +408,49 @@
             ];
 
             let isFirstRequest = true;
+            let currentMessageIndex = 0;
+            let messageInterval;
+
+            function cycleLoadingMessage() {
+                const loadingMessage = document.getElementById('loading-message');
+                console.log('Cycling to next message...');
+                
+                // Fade out
+                loadingMessage.classList.add('fade-out');
+                
+                // Wait for fade out, then update content and fade in
+                setTimeout(() => {
+                    currentMessageIndex = (currentMessageIndex + 1) % loadingMessages.length;
+                    const message = loadingMessages[currentMessageIndex];
+                    const ps = "<br><br><small>(PS: If you're feeling generous, perhaps consider donating a drachma or two for a paid tier...)</small>";
+                    loadingMessage.innerHTML = message + ps;
+                    console.log('Updated to message:', currentMessageIndex);
+                    
+                    // Trigger reflow
+                    void loadingMessage.offsetWidth;
+                    
+                    // Fade in
+                    loadingMessage.classList.remove('fade-out');
+                }, 1000);
+            }
 
             function showLoading() {
                 const loadingOverlay = document.getElementById('loading-overlay');
                 const loadingMessage = document.getElementById('loading-message');
                 if (isFirstRequest) {
+                    console.log('Showing loading overlay...');
                     loadingOverlay.style.display = 'flex';
-                    // Pick a random message and add a PS
-                    const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+                    
+                    // Set initial message
+                    const randomIndex = Math.floor(Math.random() * loadingMessages.length);
+                    currentMessageIndex = randomIndex;
+                    const randomMessage = loadingMessages[currentMessageIndex];
                     const ps = "<br><br><small>(PS: If you're feeling generous, perhaps consider donating a drachma or two for a paid tier...)</small>";
                     loadingMessage.innerHTML = randomMessage + ps;
+                    console.log('Set initial message:', randomIndex);
+                    
+                    // Start cycling messages
+                    messageInterval = setInterval(cycleLoadingMessage, 5000);
                 }
             }
 
@@ -401,6 +458,11 @@
                 const loadingOverlay = document.getElementById('loading-overlay');
                 loadingOverlay.style.display = 'none';
                 isFirstRequest = false;
+                // Clear the message interval
+                if (messageInterval) {
+                    clearInterval(messageInterval);
+                    messageInterval = null;
+                }
             }
 
             async function sendMessage() {
@@ -445,8 +507,37 @@
                 }
             }
 
+            function showLoadingTest() {
+                isFirstRequest = true; // Reset this so we can test multiple times
+                const loadingOverlay = document.getElementById('loading-overlay');
+                const loadingMessage = document.getElementById('loading-message');
+                
+                console.log('Showing loading overlay for test...');
+                loadingOverlay.style.display = 'flex';
+                
+                // Set initial message
+                const randomIndex = Math.floor(Math.random() * loadingMessages.length);
+                currentMessageIndex = randomIndex;
+                const randomMessage = loadingMessages[currentMessageIndex];
+                const ps = "<br><br><small>(PS: If you're feeling generous, perhaps consider donating a drachma or two for a paid tier...)</small>";
+                loadingMessage.innerHTML = randomMessage + ps;
+                console.log('Set initial message:', randomIndex);
+                
+                // Start cycling messages
+                if (messageInterval) {
+                    clearInterval(messageInterval);
+                }
+                messageInterval = setInterval(cycleLoadingMessage, 5000);
+                
+                // Hide after 15 seconds to simulate wake-up
+                setTimeout(() => {
+                    hideLoading();
+                }, 15000);
+            }
+
             sendButton.addEventListener('click', sendMessage);
             newChatButton.addEventListener('click', startNewChat);
+            testLoadingButton.addEventListener('click', showLoadingTest);
             messageInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     sendMessage();

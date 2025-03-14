@@ -17,6 +17,7 @@ parts/
 sdist/
 var/
 wheels/
+
 *.egg-info/
 .installed.cfg
 *.egg
@@ -52,3 +53,7 @@ htmlcov/
 .coverage.*
 coverage.xml
 *.cover 
+
+# Application specific
+logs/
+.env.production 
