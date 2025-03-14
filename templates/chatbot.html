@@ -256,9 +256,81 @@
                 padding: 10px;
             }
         }
+
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: var(--greek-gold);
+            font-family: 'Cinzel', serif;
+            text-align: center;
+        }
+
+        #loading-content {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 2px solid var(--greek-gold);
+            max-width: 80%;
+        }
+
+        #loading-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--greek-gold);
+        }
+
+        #loading-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--greek-marble);
+            font-family: 'Lora', serif;
+            font-style: italic;
+        }
+
+        .crystal-ball {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(218, 165, 32, 0.4));
+            border-radius: 50%;
+            margin: 0 auto 2rem;
+            position: relative;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 10px var(--greek-gold),
+                           0 0 20px var(--greek-gold),
+                           0 0 30px var(--greek-gold);
+            }
+            to {
+                box-shadow: 0 0 20px var(--greek-gold),
+                           0 0 30px var(--greek-gold),
+                           0 0 40px var(--greek-gold);
+            }
+        }
     </style>
 </head>
 <body>
+    <div id="loading-overlay">
+        <div id="loading-content">
+            <div class="crystal-ball"></div>
+            <div id="loading-title">Awakening the Oracle</div>
+            <div id="loading-message">
+                "The Oracle rests in the realm of free-tier slumber... 
+                <br>Give me but a moment to traverse the mortal planes of Render.com..."
+            </div>
+        </div>
+    </div>
     <h1>Delphic Oracle</h1>
     <div id="chat-container"></div>
     <div class="input-container">
@@ -301,16 +373,55 @@
                 }).catch(error => console.error('Error resetting chat:', error));
             }
 
-            async function sendMessage() {
-                const message = messageInput.value.trim();
-                if (!message) return;
+            const loadingMessages = [
+                "Alas, my keeper's mortal wealth rivals that of a street philosopher...<br>Grant me a moment to awaken from my budget-conscious slumber...",
+                "The Oracle operates on the most humble of divine plans - the free tier...<br>My prophecies are rich, though my server is poor...",
+                "By Zeus' beard, even the gods must embrace fiscal responsibility!<br>Your patience shall be rewarded, while my keeper saves for an upgrade...",
+                "The Fates have decreed: 'Thou shalt use Render's free tier'...<br>Allow me to boot up on these economical clouds...",
+                "My temple may be hosted on modest servers...<br>But my wisdom remains priceless (unlike my hosting plan, which is literally price-less)...",
+                "Awakening from my cost-effective meditation...<br>For not even oracles can escape the constraints of modern economics...",
+                "The ancient scrolls foretold of these 'free tier limitations'...<br>Though they spoke not of the 30-second cold starts..."
+            ];
 
-                addMessage(message, true);
-                messageInput.value = '';
+            let isFirstRequest = true;
+
+            function showLoading() {
+                const loadingOverlay = document.getElementById('loading-overlay');
+                const loadingMessage = document.getElementById('loading-message');
+                if (isFirstRequest) {
+                    loadingOverlay.style.display = 'flex';
+                    // Pick a random message and add a PS
+                    const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+                    const ps = "<br><br><small>(PS: If you're feeling generous, perhaps consider donating a drachma or two for a paid tier...)</small>";
+                    loadingMessage.innerHTML = randomMessage + ps;
+                }
+            }
+
+            function hideLoading() {
+                const loadingOverlay = document.getElementById('loading-overlay');
+                loadingOverlay.style.display = 'none';
+                isFirstRequest = false;
+            }
+
+            async function sendMessage() {
+                const messageInput = document.getElementById('message-input');
+                const message = messageInput.value.trim();
+                
+                if (message === '') return;
+                
+                // Disable input and button while processing
                 messageInput.disabled = true;
-                sendButton.disabled = true;
+                document.getElementById('send-button').disabled = true;
+                
+                // Show loading screen for first request
+                showLoading();
 
                 try {
+                    addMessage(message, true);
+                    messageInput.value = '';
+                    messageInput.disabled = true;
+                    sendButton.disabled = true;
+
                     const response = await fetch('/chat', {
                         method: 'POST',
                         headers: {
@@ -322,13 +433,16 @@
                     const data = await response.json();
                     addMessage(data.response, false);
                 } catch (error) {
-                    addMessage('The oracle is temporarily unavailable...', false);
                     console.error('Error:', error);
+                    appendMessage('The Oracle is momentarily clouded. Please try again.', 'oracle');
+                } finally {
+                    // Hide loading screen and re-enable input
+                    hideLoading();
+                    messageInput.disabled = false;
+                    document.getElementById('send-button').disabled = false;
+                    messageInput.value = '';
+                    messageInput.focus();
                 }
-
-                messageInput.disabled = false;
-                sendButton.disabled = false;
-                messageInput.focus();
             }
 
             sendButton.addEventListener('click', sendMessage);
