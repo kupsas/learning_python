@@ -65,8 +65,22 @@ if not os.environ.get('FLASK_DEBUG'):
         'font-src': ['\'self\'', 'https://fonts.gstatic.com'],
         'connect-src': ['\'self\'']
     }
-    # Disable force_https for local testing, but keep other security headers
-    Talisman(app, content_security_policy=csp, force_https=False)
+    # Enable all security headers for production
+    Talisman(app,
+             content_security_policy=csp,
+             force_https=True,
+             force_https_permanent=True,
+             strict_transport_security=True,
+             strict_transport_security_max_age=31536000,
+             strict_transport_security_include_subdomains=True,
+             strict_transport_security_preload=True,
+             session_cookie_secure=True,
+             session_cookie_http_only=True,
+             frame_options='DENY',
+             frame_options_allow_from=None,
+             feature_policy={'geolocation': '\'none\''},
+             referrer_policy='strict-origin-when-cross-origin'
+             )
 else:
     logger.warning("Running in debug mode - some security features are disabled")
 
