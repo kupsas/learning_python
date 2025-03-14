@@ -79,7 +79,10 @@ if not os.environ.get('FLASK_DEBUG'):
              frame_options='DENY',
              frame_options_allow_from=None,
              feature_policy={'geolocation': '\'none\''},
-             referrer_policy='strict-origin-when-cross-origin'
+             referrer_policy='strict-origin-when-cross-origin',
+             x_xss_protection=True,
+             x_content_type_options=True,
+             force_file_save=True
              )
 else:
     logger.warning("Running in debug mode - some security features are disabled")
@@ -111,11 +114,12 @@ graph = setup_conversation_graph(llm)
 def health_check():
     """Health check endpoint to verify the application is running."""
     logger.debug("Health check endpoint accessed")
+    debug_mode = os.environ.get('FLASK_DEBUG', '0')
     return jsonify({
         "status": "healthy",
         "timestamp": datetime.datetime.now().isoformat(),
         "port": int(os.environ.get('PORT', 10000)),
-        "debug_mode": bool(os.environ.get('FLASK_DEBUG')),
+        "debug_mode": debug_mode == '1',
         "environment": os.environ.get('FLASK_ENV', 'production')
     })
 
