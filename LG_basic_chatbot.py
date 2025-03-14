@@ -70,7 +70,7 @@ def setup_conversation_graph(llm=None) -> StateGraph:
         StateGraph: A compiled conversation workflow graph ready for execution.
     """
     if llm is None:
-        llm = ChatOpenAI(model="o1")
+        llm = ChatOpenAI(model="gpt-4o-mini")
         
     # Initialize the graph
     workflow = StateGraph(State)
@@ -87,11 +87,11 @@ def setup_conversation_graph(llm=None) -> StateGraph:
 def main():
     """Main execution function for the chatbot."""
     # Initialize the LLM
-    llm = ChatOpenAI(model="gpt-4")
+    llm = ChatOpenAI(model="gpt-4o-mini")
     
     # Initialize conversation state
     state = {
-        "messages": [SystemMessage(content="You are a helpful AI assistant.")],
+        "messages": [SystemMessage(content="You are a helpful AI assistant. You are given a conversation history and a new message. You need to respond to the new message based on the conversation history. Be cheerful and friendly.")],
         "should_continue": True
     }
     
