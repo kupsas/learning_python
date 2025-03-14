@@ -70,7 +70,7 @@ def setup_conversation_graph(llm=None) -> StateGraph:
         StateGraph: A compiled conversation workflow graph ready for execution.
     """
     if llm is None:
-        llm = ChatOpenAI(model="gpt-4o-mini")
+        llm = ChatOpenAI(model="gpt-4")
         
     # Initialize the graph
     workflow = StateGraph(State)
@@ -87,7 +87,7 @@ def setup_conversation_graph(llm=None) -> StateGraph:
 def main():
     """Main execution function for the chatbot."""
     # Initialize the LLM
-    llm = ChatOpenAI(model="gpt-4o-mini")
+    llm = ChatOpenAI(model="gpt-4")
     
     # Initialize conversation state
     state = {

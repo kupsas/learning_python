@@ -4,62 +4,269 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mythological Oracle</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lora:ital@0;1&display=swap">
     <style>
+        :root {
+            --greek-gold: #DAA520;
+            --greek-marble: #F5F5F5;
+            --greek-stone: #8B8589;
+            --greek-sky: #87CEEB;
+            --greek-earth: #DEB887;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'Lora', serif;
+            max-width: 1000px;
+            width: 95%;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 2vh 20px;
+            background: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)),
+                       url('https://images.pexels.com/photos/5961718/pexels-photo-5961718.jpeg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
         }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            color: var(--greek-gold);
+            font-size: min(2.5em, 8vw);
+            margin: 2vh 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        h1::before, h1::after {
+            content: "☘";
+            color: var(--greek-gold);
+            font-size: 0.8em;
+            margin: 0 20px;
+            opacity: 0.7;
+        }
+
         #chat-container {
-            height: 400px;
+            height: calc(70vh - 100px);
+            min-height: 300px;
             overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 20px;
-            margin-bottom: 20px;
-            background-color: white;
-            border-radius: 5px;
+            padding: 30px;
+            margin-bottom: 3vh;
+            background-color: rgba(255, 255, 255, 0.85);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--greek-gold);
+            position: relative;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
+                url('data:image/svg+xml,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M0,20 Q20,0 40,20 Q20,40 0,20" fill="none" stroke="%23DAA520" stroke-width="0.5"/></svg>');
+            flex: 1;
         }
+
+        #chat-container::before, #chat-container::after {
+            content: "";
+            position: absolute;
+            height: 20px;
+            width: 100%;
+            left: 0;
+            background-image: 
+                linear-gradient(90deg, 
+                    var(--greek-gold) 0%, var(--greek-gold) 10%, 
+                    transparent 10%, transparent 90%,
+                    var(--greek-gold) 90%, var(--greek-gold) 100%);
+        }
+
+        #chat-container::before {
+            top: 0;
+        }
+
+        #chat-container::after {
+            bottom: 0;
+        }
+
         .message {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: min(1.1em, 4vw);
+            line-height: 1.5;
+            position: relative;
         }
+
         .user-message {
-            background-color: #e3f2fd;
+            background-color: rgba(135, 206, 235, 0.85);
             margin-left: 20%;
+            color: #000;
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
+
         .oracle-message {
-            background-color: #f3e5f5;
+            background-color: rgba(222, 184, 135, 0.85);
             margin-right: 20%;
+            color: #000;
+            font-style: italic;
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
+
+        .oracle-message::before {
+            content: "⚡";
+            position: absolute;
+            left: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--greek-gold);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--greek-gold);
+            margin-bottom: 2vh;
+        }
+
         #message-input {
-            width: 80%;
-            padding: 10px;
-            border: 1px solid #ccc;
+            flex-grow: 1;
+            padding: 15px;
+            border: 1px solid var(--greek-stone);
             border-radius: 5px;
+            font-family: 'Lora', serif;
+            font-size: min(1.1em, 4vw);
+            background-color: var(--greek-marble);
         }
+
         #send-button {
-            width: 18%;
-            padding: 10px;
-            background-color: #673ab7;
+            padding: 15px min(30px, 4vw);
+            background-color: var(--greek-gold);
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            font-size: min(1em, 3.5vw);
+            white-space: nowrap;
         }
+
         #send-button:hover {
-            background-color: #5e35b1;
+            background-color: #B8860B;
+            transform: translateY(-2px);
+        }
+
+        #send-button:disabled {
+            background-color: var(--greek-stone);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Scrollbar styling */
+        #chat-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        #chat-container::-webkit-scrollbar-track {
+            background: var(--greek-marble);
+        }
+
+        #chat-container::-webkit-scrollbar-thumb {
+            background: var(--greek-gold);
+            border-radius: 5px;
+        }
+
+        #chat-container::-webkit-scrollbar-thumb:hover {
+            background: #B8860B;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 2vh;
+        }
+
+        #new-chat-button {
+            padding: 12px min(24px, 3vw);
+            background-color: var(--greek-stone);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            font-size: min(0.9em, 3.5vw);
+            white-space: nowrap;
+        }
+
+        #new-chat-button:hover {
+            background-color: #736F73;
+            transform: translateY(-2px);
+        }
+
+        /* Media queries for smaller screens */
+        @media (max-width: 600px) {
+            body {
+                padding: 1vh 10px;
+            }
+
+            .message {
+                margin: 10px 0;
+                padding: 10px;
+            }
+
+            .oracle-message::before {
+                left: -20px;
+                font-size: 0.9em;
+            }
+
+            .input-container {
+                padding: 15px;
+            }
+
+            #message-input {
+                padding: 10px;
+            }
+
+            #send-button {
+                padding: 10px 20px;
+            }
+        }
+
+        /* Ensure content fits on very small screens */
+        @media (max-height: 500px) {
+            #chat-container {
+                height: calc(60vh - 50px);
+                min-height: 150px;
+            }
+
+            h1 {
+                margin: 1vh 0;
+            }
+
+            .input-container {
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Mythological Oracle</h1>
+    <h1>Delphic Oracle</h1>
     <div id="chat-container"></div>
-    <div>
-        <input type="text" id="message-input" placeholder="Ask the oracle...">
-        <button id="send-button">Send</button>
+    <div class="input-container">
+        <input type="text" id="message-input" placeholder="Seek wisdom from the Oracle...">
+        <button id="send-button">Consult</button>
+    </div>
+    <div class="button-container">
+        <button id="new-chat-button">New Consultation</button>
     </div>
 
     <script>
@@ -67,6 +274,7 @@
             const chatContainer = document.getElementById('chat-container');
             const messageInput = document.getElementById('message-input');
             const sendButton = document.getElementById('send-button');
+            const newChatButton = document.getElementById('new-chat-button');
 
             function addMessage(content, isUser) {
                 const messageDiv = document.createElement('div');
@@ -74,6 +282,23 @@
                 messageDiv.textContent = content;
                 chatContainer.appendChild(messageDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            function startNewChat() {
+                chatContainer.innerHTML = '';
+                messageInput.value = '';
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                messageInput.focus();
+                
+                // Reset the session on the server
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: '__new_chat__' })
+                }).catch(error => console.error('Error resetting chat:', error));
             }
 
             async function sendMessage() {
@@ -107,6 +332,7 @@
             }
 
             sendButton.addEventListener('click', sendMessage);
+            newChatButton.addEventListener('click', startNewChat);
             messageInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     sendMessage();
