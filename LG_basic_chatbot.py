@@ -61,7 +61,14 @@ def should_continue(state: State) -> str:
 
 
 def setup_conversation_graph(llm=None) -> StateGraph:
-    """Create and configure the conversation workflow graph."""
+    """Create and configure the conversation workflow graph.
+    
+    Args:
+        llm: The language model to use for the chatbot. If None, defaults to ChatOpenAI with 'o1' model.
+        
+    Returns:
+        StateGraph: A compiled conversation workflow graph ready for execution.
+    """
     if llm is None:
         llm = ChatOpenAI(model="o1")
         
