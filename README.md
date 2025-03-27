@@ -2,6 +2,8 @@
 
 A Flask-based chatbot application that acts as a mythological oracle, providing wisdom and insights using OpenAI's GPT-4 model.
 
+🌐 **Live Demo**: [https://learning-python-27yj.onrender.com/](https://learning-python-27yj.onrender.com/)
+
 ## Features
 - Chat interface with GPT-4 integration
 - Rate limiting to prevent abuse
